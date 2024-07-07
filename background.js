@@ -1,24 +1,18 @@
 let paused = true;
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.action.setBadgeText({
-    text: "OFF",
-  });
-});
+let state = "OFF";
 
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab.url.includes("calendar.google.com")) {
     return;
   }
-  const prevState = await chrome.action.getBadgeText({ tabId: tab.id });
-  const nextState = prevState === "ON" ? "OFF" : "ON";
+  state = state === "ON" ? "OFF" : "ON";
 
-  await chrome.action.setBadgeText({
-    tabId: tab.id,
-    text: nextState,
-  });
-
-  if (nextState === "ON") {
+  if (state === "ON") {
+    await chrome.action.setBadgeText({
+      tabId: tab.id,
+      text: " ",
+    });
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["start.js"],
@@ -28,7 +22,11 @@ chrome.action.onClicked.addListener(async (tab) => {
       target: { tabId: tab.id },
       files: ["brick.css"],
     });
-  } else if (nextState === "OFF") {
+  } else if (state === "OFF") {
+    await chrome.action.setBadgeText({
+      tabId: tab.id,
+      text: "",
+    });
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["stop.js"],
